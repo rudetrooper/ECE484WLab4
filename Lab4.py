@@ -74,7 +74,7 @@ def mod_cr_br(img1,s1,s2,position_c,position_b):
 		# determine to what values [t1, t2] to compress based on slider position
 		t1 = int(float(s1) + compress_fact * float(new_position))
 		t2= int(float(s2) - compress_fact * float(new_position))
-		# case 2: stretch brightness histogram (higher contrast) (up to [0,255] distribution)
+		# case 2: stretch brightness histogram (higher contrast)
 	else:
 		# determine 50 levels of stretch on each side of brightness histogram
 		stretch_s1 = float(s1)/50.0
@@ -148,8 +148,8 @@ while (True):
 		print(dSize)
 		print("original image")
 		# size of original image
-		data_s = 263222
-		#data_s = 91078
+		data_s = dSize
+		#data_s = 263222
 		b=""
 		# keep receiving data from socket in chunks to read all bytes of image
 		while data_s > 0:
@@ -177,14 +177,15 @@ while (True):
 		# display newly loaded image
 		displayImage(img_display)
 
-	# overlay image receiving action
+	# receive overlay
 	elif (c == '1'):
 		print("overlay image")
 		# size of overlay to be received
-		data_s = 308278
+		dSize = sock.recv(6)
+		print(dSize)
+		data_s = dSize #308278
 		b=""
-		# repeat same process of receiving image data
-		# in chunks
+		# Receiving image data packets
 		while data_s > 0:
 			data = sock.recv(data_s)
 			b+=data
@@ -196,7 +197,7 @@ while (True):
 		cv2.imwrite('overlay.bmp',img2)
 		# let user know it's successful
 		print("Overlay Image Received")
-	# overlay overlay over original action
+	# Display modified overlay over original image
 	elif (c== '2'):
 		# read overlay image
 		img_overlay = cv2.imread('overlay.bmp',0)
@@ -216,11 +217,10 @@ while (True):
 	# slider values action
 	elif (c == '4'):
 		try:
-			# receive sliders' values ( 4 bytes)
+			# receive slider values (4 bytes)
 			slider_values = ""
 			slider_values = sock.recv(4)
-			# keep receiving slider data until
-			# all slider values data is received
+			# continually receive slider data until all data packets have been recieved
 			while (len(slider_values) < 4):
 				slider_values = sock.recv(4)
 			# convert each slider value into an integer
